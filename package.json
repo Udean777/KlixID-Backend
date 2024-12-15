@@ -1,0 +1,11 @@
+{
+  "name": "klix_id_backend",
+  "version": "1.0.0",
+  "description": "A server side of Klix ID app",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Sajudin Ma'ruf",
+  "license": "ISC"
+}

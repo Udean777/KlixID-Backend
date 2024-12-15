@@ -2,9 +2,10 @@
   "name": "klix_id_backend",
   "version": "1.0.0",
   "description": "A server side of Klix ID app",
-  "main": "server.js",
+  "main": "./server.js",
+  "type": "module",
   "scripts": {
-    "dev": "nodemon server.js",
+    "dev": "nodemon ./server.js",
     "start": "nodemon",
     "build": "npm install",
     "test": "echo \"Error: no test specified\" && exit 1"

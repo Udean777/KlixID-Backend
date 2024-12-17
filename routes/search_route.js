@@ -1,7 +1,10 @@
 // Import express framework to create routes
 import express from "express";
 
-// Import controller functions from the search_controller.js file
+// Import route protection middleware
+import { protectRoute } from "../middleware/protect_route.js";
+
+// Import controller functions from the search controller
 import {
   getSearchHistory,
   removeItemFromSearchHistory,
@@ -10,33 +13,49 @@ import {
   searchTvShows,
 } from "../controllers/search_controller.js";
 
-// Create a new router instance for search-related routes
+/**
+ * Router for search-related endpoints
+ * @module searchRoutes
+ */
 const searchRoutes = express.Router();
 
-// Route for searching persons by name
-// Endpoint: GET /person/:query
-// Requires a search query as a parameter to find persons matching the query
-searchRoutes.get("/person/:query", searchPerson);
+/**
+ * Search for persons by name
+ * @route GET /person/:query
+ * @param {string} query - Search term for persons
+ * @middleware protectRoute - Ensures user authentication
+ */
+searchRoutes.get("/person/:query", protectRoute, searchPerson);
 
-// Route for searching movies by title
-// Endpoint: GET /movie/:query
-// Requires a search query as a parameter to find movies matching the query
-searchRoutes.get("/movie/:query", searchMovies);
+/**
+ * Search for movies by title
+ * @route GET /movie/:query
+ * @param {string} query - Search term for movies
+ * @middleware protectRoute - Ensures user authentication
+ */
+searchRoutes.get("/movie/:query", protectRoute, searchMovies);
 
-// Route for searching TV shows by title
-// Endpoint: GET /tv/:query
-// Requires a search query as a parameter to find TV shows matching the query
-searchRoutes.get("/tv/:query", searchTvShows);
+/**
+ * Search for TV shows by title
+ * @route GET /tv/:query
+ * @param {string} query - Search term for TV shows
+ * @middleware protectRoute - Ensures user authentication
+ */
+searchRoutes.get("/tv/:query", protectRoute, searchTvShows);
 
-// Route for retrieving the search history of the authenticated user
-// Endpoint: GET /history
-// Returns the search history stored in the user's profile
-searchRoutes.get("/history", getSearchHistory);
+/**
+ * Retrieve user's search history
+ * @route GET /history
+ * @middleware protectRoute - Ensures user authentication
+ */
+searchRoutes.get("/history", protectRoute, getSearchHistory);
 
-// Route for deleting a specific item from the search history
-// Endpoint: DELETE /history/:id
-// Requires an item ID as a parameter to remove that specific search record
-searchRoutes.delete("/history/:id", removeItemFromSearchHistory);
+/**
+ * Remove a specific item from search history
+ * @route DELETE /history/:id
+ * @param {string} id - ID of the search history item to remove
+ * @middleware protectRoute - Ensures user authentication
+ */
+searchRoutes.delete("/history/:id", protectRoute, removeItemFromSearchHistory);
 
-// Export the configured search routes to be used in the main application
 export default searchRoutes;

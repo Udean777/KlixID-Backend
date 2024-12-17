@@ -1,7 +1,10 @@
-// Import necessary dependencies
+// Import express framework to create routes
 import express from "express";
 
-// Import all movie-related controller functions from the movie controller
+// Import route protection middleware
+import { protectRoute } from "../middleware/protect_route.js";
+
+// Import movie-related controller functions
 import {
   getMovieDetails,
   getMovieTrailer,
@@ -12,43 +15,64 @@ import {
   getMoviesByCategory,
 } from "../controllers/movie_controller.js";
 
-// Create an Express router specifically for movie-related routes
+/**
+ * Router for movie-related endpoints
+ * @module movieRoutes
+ */
 const movieRoutes = express.Router();
 
-// Route for fetching trending movies
-// Endpoint: GET /trending
-// Returns the top trending movies of the day
-movieRoutes.get("/trending", getTrendingMovies);
+/**
+ * Fetch trending movies
+ * @route GET /trending
+ * @middleware protectRoute - Ensures user authentication
+ */
+movieRoutes.get("/trending", protectRoute, getTrendingMovies);
 
-// Route for fetching currently playing movies
-// Endpoint: GET /nowplaying
-// Returns movies currently in theaters
-movieRoutes.get("/nowplaying", getNowPlayingMovies);
+/**
+ * Fetch currently playing movies
+ * @route GET /nowplaying
+ * @middleware protectRoute - Ensures user authentication
+ */
+movieRoutes.get("/nowplaying", protectRoute, getNowPlayingMovies);
 
-// Route for fetching a movie's trailer
-// Endpoint: GET /:id/trailer
-// Requires a movie ID to retrieve its trailer
-movieRoutes.get("/:id/trailer", getMovieTrailer);
+/**
+ * Fetch movie trailer
+ * @route GET /:id/trailer
+ * @param {string} id - Movie ID
+ * @middleware protectRoute - Ensures user authentication
+ */
+movieRoutes.get("/:id/trailer", protectRoute, getMovieTrailer);
 
-// Route for fetching detailed information about a specific movie
-// Endpoint: GET /:id/details
-// Requires a movie ID to retrieve comprehensive movie details
-movieRoutes.get("/:id/details", getMovieDetails);
+/**
+ * Fetch movie details
+ * @route GET /:id/details
+ * @param {string} id - Movie ID
+ * @middleware protectRoute - Ensures user authentication
+ */
+movieRoutes.get("/:id/details", protectRoute, getMovieDetails);
 
-// Route for fetching movies similar to a specific movie
-// Endpoint: GET /:id/similar
-// Requires a movie ID to find similar movies
-movieRoutes.get("/:id/similar", getSimilarMovies);
+/**
+ * Fetch similar movies
+ * @route GET /:id/similar
+ * @param {string} id - Movie ID
+ * @middleware protectRoute - Ensures user authentication
+ */
+movieRoutes.get("/:id/similar", protectRoute, getSimilarMovies);
 
-// Route for fetching movie recommendations based on a specific movie
-// Endpoint: GET /:id/recommendations
-// Requires a movie ID to generate personalized movie recommendations
-movieRoutes.get("/:id/recommendations", getRecommendationMovies);
+/**
+ * Fetch movie recommendations
+ * @route GET /:id/recommendations
+ * @param {string} id - Movie ID
+ * @middleware protectRoute - Ensures user authentication
+ */
+movieRoutes.get("/:id/recommendations", protectRoute, getRecommendationMovies);
 
-// Route for fetching movies by category
-// Endpoint: GET /:category
-// Allows retrieving movies from different categories like popular, top_rated, upcoming
-movieRoutes.get("/:category", getMoviesByCategory);
+/**
+ * Fetch movies by category
+ * @route GET /:category
+ * @param {string} category - Movie category (popular, top_rated, upcoming)
+ * @middleware protectRoute - Ensures user authentication
+ */
+movieRoutes.get("/:category", protectRoute, getMoviesByCategory);
 
-// Export the movie routes to be used in the main Express application
 export default movieRoutes;

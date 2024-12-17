@@ -3,7 +3,14 @@ import { User } from "../models/user_model.js";
 import bcrypt from "bcryptjs";
 import { generateTokenAndCookies } from "../utils/generate_token.js";
 
-// User SignUp Controller
+/**
+ * User SignUp Controller
+ * @route POST /auth/signup
+ * @param {Object} req.body - User registration details
+ * @param {string} req.body.email - User's email address
+ * @param {string} req.body.password - User's password
+ * @returns {Object} Created user details and authentication token
+ */
 export const signUp = async (req, res) => {
   try {
     // Extract email and password from request body
@@ -11,9 +18,10 @@ export const signUp = async (req, res) => {
 
     // Validation: Check if email and password are provided
     if (!email || !password) {
-      return res
-        .status(400)
-        .json({ success: false, message: "All fields are required" });
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required",
+      });
     }
 
     // Validation: Minimum password length
@@ -27,15 +35,19 @@ export const signUp = async (req, res) => {
     // Validation: Email format using regex
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      return res.status(400).json({ success: false, message: "Invalid email" });
+      return res.status(400).json({
+        success: false,
+        message: "Invalid email format",
+      });
     }
 
     // Check if user with the same email already exists
     const existUserByEmail = await User.findOne({ email: email });
     if (existUserByEmail) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Email already exists" });
+      return res.status(400).json({
+        success: false,
+        message: "Email already in use",
+      });
     }
 
     // Generate salt and hash the password for secure storage
@@ -69,14 +81,27 @@ export const signUp = async (req, res) => {
         token: token,
       },
     });
-  } catch (e) {
-    // Handle any unexpected errors during signup
-    console.log("Error in signup controller", e.message);
-    res.status(500).json({ success: false, message: "Internal server error" });
+  } catch (error) {
+    // Log the error for server-side tracking
+    console.error("Error in signup controller:", error.message);
+
+    // Return a 500 Internal Server Error
+    res.status(500).json({
+      success: false,
+      message: "Failed to create user account",
+      error: error.message,
+    });
   }
 };
 
-// User SignIn Controller
+/**
+ * User SignIn Controller
+ * @route POST /auth/signin
+ * @param {Object} req.body - User login credentials
+ * @param {string} req.body.email - User's email address
+ * @param {string} req.body.password - User's password
+ * @returns {Object} Authenticated user details and token
+ */
 export const signIn = async (req, res) => {
   try {
     // Extract email and password from request body
@@ -84,17 +109,19 @@ export const signIn = async (req, res) => {
 
     // Validation: Check if email and password are provided
     if (!email || !password) {
-      return res
-        .status(400)
-        .json({ success: false, message: "All fields are required" });
+      return res.status(400).json({
+        success: false,
+        message: "Email and password are required",
+      });
     }
 
     // Check if user exists with the provided email
     const existUserByEmail = await User.findOne({ email: email });
     if (!existUserByEmail) {
-      return res
-        .status(400)
-        .json({ success: false, message: "User not found" });
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
     }
 
     // Compare provided password with stored hashed password
@@ -103,9 +130,10 @@ export const signIn = async (req, res) => {
       existUserByEmail.password
     );
     if (!isPasswordCorrect) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid credentials" });
+      return res.status(401).json({
+        success: false,
+        message: "Invalid credentials",
+      });
     }
 
     // Generate authentication token and set cookies
@@ -119,39 +147,76 @@ export const signIn = async (req, res) => {
         token: token,
       },
     });
-  } catch (e) {
-    // Handle any unexpected errors during signin
-    console.log("Error in login controller", e.message);
-    res.status(500).json({ success: false, message: "Internal server error" });
+  } catch (error) {
+    // Log the error for server-side tracking
+    console.error("Error in login controller:", error.message);
+
+    // Return a 500 Internal Server Error
+    res.status(500).json({
+      success: false,
+      message: "Failed to authenticate user",
+      error: error.message,
+    });
   }
 };
 
-// User SignOut Controller
+/**
+ * User SignOut Controller
+ * @route POST /auth/signout
+ * @returns {Object} Logout confirmation
+ */
 export const signOut = async (req, res) => {
   try {
     // Clear the JWT cookie
     res.clearCookie("jwt-klixid");
 
     // Send successful logout response
-    res.status(200).json({ success: true, message: "Logged out successfully" });
-  } catch (e) {
-    // Handle any unexpected errors during logout
-    console.log("Error in logout controller", e.message);
-    res.status(500).json({ success: false, message: "Internal server error" });
+    res.status(200).json({
+      success: true,
+      message: "Logged out successfully",
+    });
+  } catch (error) {
+    // Log the error for server-side tracking
+    console.error("Error in logout controller:", error.message);
+
+    // Return a 500 Internal Server Error
+    res.status(500).json({
+      success: false,
+      message: "Failed to log out",
+      error: error.message,
+    });
   }
 };
 
-// Authentication Check Controller
+/**
+ * Authentication Check Controller
+ * @route GET /auth/check
+ * @returns {Object} Authenticated user details
+ */
 export const authCheck = async (req, res) => {
   try {
-    // Log the authenticated user
-    console.log(`Req user: ${req.user}`);
+    // Verify that a user is authenticated
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Not authenticated",
+      });
+    }
 
     // Send the authenticated user details
-    res.status(200).json({ success: true, user: req.user });
-  } catch (e) {
-    // Handle any unexpected errors during auth check
-    console.log("Error in authCheck controller", e.message);
-    res.status(500).json({ success: false, message: "Internal server error" });
+    res.status(200).json({
+      success: true,
+      user: req.user,
+    });
+  } catch (error) {
+    // Log the error for server-side tracking
+    console.error("Error in authCheck controller:", error.message);
+
+    // Return a 500 Internal Server Error
+    res.status(500).json({
+      success: false,
+      message: "Failed to verify authentication",
+      error: error.message,
+    });
   }
 };

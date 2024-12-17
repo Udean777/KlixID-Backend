@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 
 import authRoutes from "./routes/auth_route.js";
 import movieRoutes from "./routes/movie_route.js";
+import searchRoutes from "./routes/search_route.js";
 
 const app = express();
 
@@ -15,6 +16,7 @@ app.use(cookieParser());
 
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/movies", movieRoutes);
+app.use("/api/v1/search", searchRoutes);
 
 if (ENV_VARS.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "/frontend/dist")));

@@ -1,5 +1,5 @@
 // Import the User model from the models directory
-import { User } from "../models/user_model";
+import { User } from "../models/user_model.js";
 
 // Import the TMDB service for fetching data from the API
 import { fetchFromTMDB } from "../services/tmdb_services.js";

@@ -13,9 +13,19 @@ export const getTrendingTv = async (req, res) => {
       "https://api.themoviedb.org/3/trending/tv/day?language=en-US"
     );
 
+    // Check if we have valid results
+    if (!data.results || data.results.length === 0) {
+      // Return 404 if no trending shows are found
+      // This is better than 500 as it indicates the resource wasn't found rather than a server error
+      return res.status(404).json({
+        success: false,
+        message: "No trending TV shows found at the moment",
+      });
+    }
+
     // Select a random TV show from the results
     const randomMovie =
-      data.results[Math.floor(Math.random() * data.results?.length)];
+      data.results[Math.floor(Math.random() * data.results.length)];
 
     // Return the random TV show
     res.json({ success: true, data: randomMovie });
@@ -23,7 +33,35 @@ export const getTrendingTv = async (req, res) => {
     // Log the error for server-side tracking
     console.error("Error fetching trending TV shows:", error);
 
-    // Return a 500 Internal Server Error
+    // Handle different types of errors with appropriate status codes
+    // 401 - Unauthorized (e.g., invalid API key)
+    if (error.response?.status === 401) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized access to TMDB API",
+        error: "Invalid API credentials",
+      });
+    }
+
+    // 429 - Too Many Requests (Rate limiting)
+    if (error.response?.status === 429) {
+      return res.status(429).json({
+        success: false,
+        message: "Too many requests to TMDB API",
+        error: "Rate limit exceeded",
+      });
+    }
+
+    // 503 - Service Unavailable (TMDB API is down)
+    if (error.response?.status === 503) {
+      return res.status(503).json({
+        success: false,
+        message: "TMDB service is currently unavailable",
+        error: "External service unavailable",
+      });
+    }
+
+    // 500 - Internal Server Error (for unexpected errors)
     res.status(500).json({
       success: false,
       message: "Failed to fetch trending TV shows",
@@ -44,13 +82,57 @@ export const getPopularTv = async (req, res) => {
       "https://api.themoviedb.org/3/tv/popular?language=en-US&page=1"
     );
 
+    // Check if we have valid results
+    if (!data.results || data.results.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No popular TV shows found at the moment",
+      });
+    }
+
     // Return the list of popular TV shows
     res.json({ success: true, content: data.results });
   } catch (error) {
     // Log the error for server-side tracking
     console.error("Error fetching popular TV shows:", error);
 
-    // Return a 500 Internal Server Error
+    // Handle API authentication errors
+    if (error.response?.status === 401) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized access to TMDB API",
+        error: "Invalid API credentials",
+      });
+    }
+
+    // Handle rate limiting
+    if (error.response?.status === 429) {
+      return res.status(429).json({
+        success: false,
+        message: "Too many requests to TMDB API",
+        error: "Rate limit exceeded",
+      });
+    }
+
+    // Handle TMDB service availability
+    if (error.response?.status === 503) {
+      return res.status(503).json({
+        success: false,
+        message: "TMDB service is currently unavailable",
+        error: "External service unavailable",
+      });
+    }
+
+    // Handle network-related errors
+    if (error.code === "ECONNREFUSED" || error.code === "ECONNABORTED") {
+      return res.status(503).json({
+        success: false,
+        message: "Unable to connect to TMDB service",
+        error: "Connection error",
+      });
+    }
+
+    // Default server error
     res.status(500).json({
       success: false,
       message: "Failed to fetch popular TV shows",
@@ -67,6 +149,15 @@ export const getPopularTv = async (req, res) => {
  */
 export const getTvTrailers = async (req, res) => {
   const { id } = req.params;
+
+  // Validate TV show ID
+  if (!id || isNaN(id)) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid TV show ID provided",
+    });
+  }
+
   try {
     // Fetch trailers for the specific TV show
     const data = await fetchFromTMDB(
@@ -88,14 +179,33 @@ export const getTvTrailers = async (req, res) => {
     console.error(`Error fetching trailers for TV show ${id}:`, error);
 
     // Handle specific error cases
-    if (error.response && error.response.status === 404) {
+    // 404 - TV show not found
+    if (error.response?.status === 404) {
       return res.status(404).json({
         success: false,
         message: "TV show not found",
       });
     }
 
-    // Return a 500 Internal Server Error for other errors
+    // 401 - Unauthorized access
+    if (error.response?.status === 401) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized access to TMDB API",
+        error: "Invalid API credentials",
+      });
+    }
+
+    // 429 - Rate limiting
+    if (error.response?.status === 429) {
+      return res.status(429).json({
+        success: false,
+        message: "Too many requests to TMDB API",
+        error: "Rate limit exceeded",
+      });
+    }
+
+    // Default server error
     res.status(500).json({
       success: false,
       message: "Failed to fetch TV show trailers",
@@ -118,11 +228,46 @@ export const getTvDetails = async (req, res) => {
       `https://api.themoviedb.org/3/tv/${id}?language=en-US`
     );
 
+    // Check if tv details exist
+    if (!data.results || data.results.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "TV show not found",
+      });
+    }
+
     // Return the TV show details
     res.status(200).json({ success: true, content: data });
   } catch (error) {
     // Log the error for server-side tracking
     console.error(`Error fetching details for TV show ${id}:`, error);
+
+    // Handle specific error cases
+    // 404 - TV show not found
+    if (error.response?.status === 404) {
+      return res.status(404).json({
+        success: false,
+        message: "TV show not found",
+      });
+    }
+
+    // 401 - Unauthorized access
+    if (error.response?.status === 401) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized access to TMDB API",
+        error: "Invalid API credentials",
+      });
+    }
+
+    // 429 - Rate limiting
+    if (error.response?.status === 429) {
+      return res.status(429).json({
+        success: false,
+        message: "Too many requests to TMDB API",
+        error: "Rate limit exceeded",
+      });
+    }
 
     // Handle specific error cases
     if (error.response && error.response.status === 404) {
@@ -155,11 +300,46 @@ export const getSimilarTvs = async (req, res) => {
       `https://api.themoviedb.org/3/tv/${id}/similar?language=en-US&page=1`
     );
 
+    // Check if similar TV shows exist
+    if (!data.results || data.results.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No similar TV shows found",
+      });
+    }
+
     // Return the list of similar TV shows
     res.status(200).json({ success: true, content: data.results });
   } catch (error) {
     // Log the error for server-side tracking
     console.error(`Error fetching similar TV shows for ${id}:`, error);
+
+    // Handle specific error cases
+    // 404 - TV show not found
+    if (error.response?.status === 404) {
+      return res.status(404).json({
+        success: false,
+        message: "TV show not found",
+      });
+    }
+
+    // 401 - Unauthorized access
+    if (error.response?.status === 401) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized access to TMDB API",
+        error: "Invalid API credentials",
+      });
+    }
+
+    // 429 - Rate limiting
+    if (error.response?.status === 429) {
+      return res.status(429).json({
+        success: false,
+        message: "Too many requests to TMDB API",
+        error: "Rate limit exceeded",
+      });
+    }
 
     // Return a 500 Internal Server Error
     res.status(500).json({
@@ -184,11 +364,46 @@ export async function getRecommendationTvs(req, res) {
       `https://api.themoviedb.org/3/tv/${id}/recommendations?language=en-US&page=1`
     );
 
+    // Check if recommended TV shows exist
+    if (!data.results || data.results.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No recommended TV shows found",
+      });
+    }
+
     // Return the list of recommended TV shows
     res.status(200).json({ success: true, content: data.results });
   } catch (error) {
     // Log the error for server-side tracking
     console.error(`Error fetching recommendations for TV show ${id}:`, error);
+
+    // Handle specific error cases
+    // 404 - TV show not found
+    if (error.response?.status === 404) {
+      return res.status(404).json({
+        success: false,
+        message: "TV show not found",
+      });
+    }
+
+    // 401 - Unauthorized access
+    if (error.response?.status === 401) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized access to TMDB API",
+        error: "Invalid API credentials",
+      });
+    }
+
+    // 429 - Rate limiting
+    if (error.response?.status === 429) {
+      return res.status(429).json({
+        success: false,
+        message: "Too many requests to TMDB API",
+        error: "Rate limit exceeded",
+      });
+    }
 
     // Return a 500 Internal Server Error
     res.status(500).json({
@@ -213,11 +428,46 @@ export async function getTvsByCategory(req, res) {
       `https://api.themoviedb.org/3/tv/${category}?language=en-US&page=1`
     );
 
+    // Check if TV shows exist
+    if (!data.results || data.results.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No TV shows found in the specified category",
+      });
+    }
+
     // Return the list of TV shows in the category
     res.status(200).json({ success: true, content: data.results });
   } catch (error) {
     // Log the error for server-side tracking
     console.error(`Error fetching TV shows in category ${category}:`, error);
+
+    // Handle specific error cases
+    // 404 - Category not found
+    if (error.response?.status === 404) {
+      return res.status(404).json({
+        success: false,
+        message: "Category not found",
+      });
+    }
+
+    // 401 - Unauthorized access
+    if (error.response?.status === 401) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized access to TMDB API",
+        error: "Invalid API credentials",
+      });
+    }
+
+    // 429 - Rate limiting
+    if (error.response?.status === 429) {
+      return res.status(429).json({
+        success: false,
+        message: "Too many requests to TMDB API",
+        error: "Rate limit exceeded",
+      });
+    }
 
     // Return a 500 Internal Server Error
     res.status(500).json({
@@ -242,11 +492,46 @@ export async function getTvKeywords(req, res) {
       `https://api.themoviedb.org/3/tv/${id}/keywords`
     );
 
+    // Check if keywords exist
+    if (!data.results || data.results.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No keywords found for the TV show",
+      });
+    }
+
     // Return the list of keywords
     res.status(200).json({ success: true, content: data.results });
   } catch (error) {
     // Log the error for server-side tracking
     console.error(`Error fetching keywords for TV show ${id}:`, error);
+
+    // Handle specific error cases
+    // 404 - TV show not found
+    if (error.response?.status === 404) {
+      return res.status(404).json({
+        success: false,
+        message: "TV show not found",
+      });
+    }
+
+    // 401 - Unauthorized access
+    if (error.response?.status === 401) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized access to TMDB API",
+        error: "Invalid API credentials",
+      });
+    }
+
+    // 429 - Rate limiting
+    if (error.response?.status === 429) {
+      return res.status(429).json({
+        success: false,
+        message: "Too many requests to TMDB API",
+        error: "Rate limit exceeded",
+      });
+    }
 
     // Return a 500 Internal Server Error
     res.status(500).json({

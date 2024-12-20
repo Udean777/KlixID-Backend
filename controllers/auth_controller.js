@@ -85,11 +85,29 @@ export const signUp = async (req, res) => {
     // Log the error for server-side tracking
     console.error("Error in signup controller:", error.message);
 
-    // Return a 500 Internal Server Error
-    res.status(500).json({
+    // Handle Mongoose validation errors with detailed feedback
+    if (error.name === "ValidationError") {
+      return res.status(422).json({
+        success: false,
+        message: "Invalid user data provided",
+        errors: Object.values(error.errors).map((err) => err.message),
+      });
+    }
+
+    // Handle duplicate key errors (e.g., duplicate email)
+    if (error.name === "MongoServerError" && error.code === 11000) {
+      return res.status(409).json({
+        success: false,
+        message: "User with this email already exists",
+      });
+    }
+
+    // Return a 503 Service Unavailable for other server errors
+    res.status(503).json({
       success: false,
-      message: "Failed to create user account",
-      error: error.message,
+      message: "Service temporarily unavailable. Please try again later.",
+      // Only include detailed error in development environment
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 };
@@ -151,11 +169,28 @@ export const signIn = async (req, res) => {
     // Log the error for server-side tracking
     console.error("Error in login controller:", error.message);
 
-    // Return a 500 Internal Server Error
-    res.status(500).json({
+    // Handle database connection errors
+    if (error.name === "MongooseError") {
+      return res.status(503).json({
+        success: false,
+        message: "Database connection error. Please try again later.",
+      });
+    }
+
+    // Handle JWT token generation errors
+    if (error.name === "JsonWebTokenError") {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication failed. Please try logging in again.",
+      });
+    }
+
+    // Return a 503 Service Unavailable for other server errors
+    res.status(503).json({
       success: false,
-      message: "Failed to authenticate user",
-      error: error.message,
+      message: "Service temporarily unavailable. Please try again later.",
+      // Only include detailed error in development environment
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 };
@@ -179,11 +214,20 @@ export const signOut = async (req, res) => {
     // Log the error for server-side tracking
     console.error("Error in logout controller:", error.message);
 
-    // Return a 500 Internal Server Error
-    res.status(500).json({
+    // Handle invalid token or session errors
+    if (error.name === "TokenError") {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid session. Already logged out.",
+      });
+    }
+
+    // Return a 503 Service Unavailable for other server errors
+    res.status(503).json({
       success: false,
-      message: "Failed to log out",
-      error: error.message,
+      message: "Unable to complete logout. Please try again.",
+      // Only include detailed error in development environment
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 };
@@ -212,11 +256,29 @@ export const authCheck = async (req, res) => {
     // Log the error for server-side tracking
     console.error("Error in authCheck controller:", error.message);
 
-    // Return a 500 Internal Server Error
-    res.status(500).json({
+    // Handle expired JWT token errors
+    if (error.name === "TokenExpiredError") {
+      return res.status(401).json({
+        success: false,
+        message: "Session expired. Please login again.",
+      });
+    }
+
+    // Handle invalid JWT token errors
+    if (error.name === "JsonWebTokenError") {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid authentication token. Please login again.",
+      });
+    }
+
+    // Return a 503 Service Unavailable for other server errors
+    res.status(503).json({
       success: false,
-      message: "Failed to verify authentication",
-      error: error.message,
+      message:
+        "Unable to verify authentication status. Please try again later.",
+      // Only include detailed error in development environment
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 };

@@ -22,11 +22,27 @@ export const getTrendingMovies = async (req, res) => {
     // Log the error for server-side tracking
     console.error(`Error in getTrendingMovies controller: ${error.message}`);
 
-    // Return a 500 Internal Server Error
-    res.status(500).json({
+    // Handle API authentication errors
+    if (error.response?.status === 401) {
+      return res.status(503).json({
+        success: false,
+        message: "Unable to access movie service. Please try again later.",
+      });
+    }
+
+    // Handle rate limiting errors
+    if (error.response?.status === 429) {
+      return res.status(429).json({
+        success: false,
+        message: "Too many requests. Please try again later.",
+      });
+    }
+
+    // Handle service availability errors
+    res.status(503).json({
       success: false,
-      message: "Failed to fetch trending movies",
-      error: error.message,
+      message: "Movie service temporarily unavailable",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 };
@@ -57,11 +73,27 @@ export const getNowPlayingMovies = async (req, res) => {
     // Log the error for server-side tracking
     console.error(`Error in getNowPlayingMovies controller: ${error.message}`);
 
-    // Return a 500 Internal Server Error
-    res.status(500).json({
+    // Handle API authentication errors
+    if (error.response?.status === 401) {
+      return res.status(503).json({
+        success: false,
+        message: "Unable to access movie service. Please try again later.",
+      });
+    }
+
+    // Handle rate limiting errors
+    if (error.response?.status === 429) {
+      return res.status(429).json({
+        success: false,
+        message: "Too many requests. Please try again later.",
+      });
+    }
+
+    // Handle service availability errors
+    res.status(503).json({
       success: false,
-      message: "Failed to fetch now playing movies",
-      error: error.message,
+      message: "Movie service temporarily unavailable",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 };
@@ -76,6 +108,14 @@ export const getMovieTrailer = async (req, res) => {
   const { id } = req.params;
 
   try {
+    // Validate movie ID
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Movie ID is required",
+      });
+    }
+
     // Fetch video information for the specified movie
     const data = await fetchFromTMDB(
       `https://api.themoviedb.org/3/movie/${id}/videos?language=en-US`
@@ -95,19 +135,35 @@ export const getMovieTrailer = async (req, res) => {
     // Log the error for server-side tracking
     console.error(`Error in getMovieTrailer controller: ${error.message}`);
 
-    // Handle specific error cases
-    if (error.response && error.response.status === 404) {
+    // Handle invalid movie ID
+    if (error.response?.status === 404) {
       return res.status(404).json({
         success: false,
         message: "Movie not found",
       });
     }
 
-    // Return a 500 Internal Server Error for other errors
-    res.status(500).json({
+    // Handle API authentication errors
+    if (error.response?.status === 401) {
+      return res.status(503).json({
+        success: false,
+        message: "Unable to access movie service. Please try again later.",
+      });
+    }
+
+    // Handle rate limiting errors
+    if (error.response?.status === 429) {
+      return res.status(429).json({
+        success: false,
+        message: "Too many requests. Please try again later.",
+      });
+    }
+
+    // Handle service availability errors
+    res.status(503).json({
       success: false,
-      message: "Failed to fetch movie trailer",
-      error: error.message,
+      message: "Unable to fetch movie trailer. Please try again later.",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 };
@@ -122,6 +178,14 @@ export const getMovieDetails = async (req, res) => {
   const { id } = req.params;
 
   try {
+    // Validate movie ID
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Movie ID is required",
+      });
+    }
+
     // Fetch comprehensive details for the specified movie
     const data = await fetchFromTMDB(
       `https://api.themoviedb.org/3/movie/${id}?language=en-US`
@@ -133,19 +197,35 @@ export const getMovieDetails = async (req, res) => {
     // Log the error for server-side tracking
     console.error(`Error in getMovieDetails controller: ${error.message}`);
 
-    // Handle specific error cases
-    if (error.response && error.response.status === 404) {
+    // Handle invalid movie ID
+    if (error.response?.status === 404) {
       return res.status(404).json({
         success: false,
         message: "Movie not found",
       });
     }
 
-    // Return a 500 Internal Server Error for other errors
-    res.status(500).json({
+    // Handle API authentication errors
+    if (error.response?.status === 401) {
+      return res.status(503).json({
+        success: false,
+        message: "Unable to access movie service. Please try again later.",
+      });
+    }
+
+    // Handle rate limiting errors
+    if (error.response?.status === 429) {
+      return res.status(429).json({
+        success: false,
+        message: "Too many requests. Please try again later.",
+      });
+    }
+
+    // Handle service availability errors
+    res.status(503).json({
       success: false,
-      message: "Failed to fetch movie details",
-      error: error.message,
+      message: "Unable to fetch movie details. Please try again later.",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 };
@@ -160,6 +240,14 @@ export const getSimilarMovies = async (req, res) => {
   const { id } = req.params;
 
   try {
+    // Validate movie ID
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Movie ID is required",
+      });
+    }
+
     // Fetch a list of movies similar to the specified movie
     const data = await fetchFromTMDB(
       `https://api.themoviedb.org/3/movie/${id}/similar?language=en-US&page=1`
@@ -179,11 +267,35 @@ export const getSimilarMovies = async (req, res) => {
     // Log the error for server-side tracking
     console.error(`Error in getSimilarMovies controller: ${error.message}`);
 
-    // Return a 500 Internal Server Error
-    res.status(500).json({
+    // Handle invalid movie ID
+    if (error.response?.status === 404) {
+      return res.status(404).json({
+        success: false,
+        message: "Movie not found",
+      });
+    }
+
+    // Handle API authentication errors
+    if (error.response?.status === 401) {
+      return res.status(503).json({
+        success: false,
+        message: "Unable to access movie service. Please try again later.",
+      });
+    }
+
+    // Handle rate limiting errors
+    if (error.response?.status === 429) {
+      return res.status(429).json({
+        success: false,
+        message: "Too many requests. Please try again later.",
+      });
+    }
+
+    // Handle service availability errors
+    res.status(503).json({
       success: false,
-      message: "Failed to fetch similar movies",
-      error: error.message,
+      message: "Unable to fetch similar movies. Please try again later.",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 };
@@ -198,6 +310,14 @@ export const getRecommendationMovies = async (req, res) => {
   const { id } = req.params;
 
   try {
+    // Validate movie ID
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Movie ID is required",
+      });
+    }
+
     // Fetch movie recommendations based on the specified movie
     const data = await fetchFromTMDB(
       `https://api.themoviedb.org/3/movie/${id}/recommendations?language=en-US&page=1`
@@ -219,11 +339,35 @@ export const getRecommendationMovies = async (req, res) => {
       `Error in getRecommendationMovies controller: ${error.message}`
     );
 
-    // Return a 500 Internal Server Error
-    res.status(500).json({
+    // Handle invalid movie ID
+    if (error.response?.status === 404) {
+      return res.status(404).json({
+        success: false,
+        message: "Movie not found",
+      });
+    }
+
+    // Handle API authentication errors
+    if (error.response?.status === 401) {
+      return res.status(503).json({
+        success: false,
+        message: "Unable to access movie service. Please try again later.",
+      });
+    }
+
+    // Handle rate limiting errors
+    if (error.response?.status === 429) {
+      return res.status(429).json({
+        success: false,
+        message: "Too many requests. Please try again later.",
+      });
+    }
+
+    // Handle service availability errors
+    res.status(503).json({
       success: false,
-      message: "Failed to fetch movie recommendations",
-      error: error.message,
+      message: "Unable to fetch movie recommendations. Please try again later.",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 };
@@ -238,6 +382,24 @@ export const getMoviesByCategory = async (req, res) => {
   const { category } = req.params;
 
   try {
+    // Validate category parameter
+    if (!category) {
+      return res.status(400).json({
+        success: false,
+        message: "Category parameter is required",
+      });
+    }
+
+    // Validate category value
+    const validCategories = ["popular", "top_rated", "upcoming", "now_playing"];
+    if (!validCategories.includes(category)) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Invalid category. Must be one of: popular, top_rated, upcoming, now_playing",
+      });
+    }
+
     // Fetch movies for the specified category
     const data = await fetchFromTMDB(
       `https://api.themoviedb.org/3/movie/${category}?language=en-US&page=1`
@@ -257,11 +419,27 @@ export const getMoviesByCategory = async (req, res) => {
     // Log the error for server-side tracking
     console.error(`Error in getMoviesByCategory controller: ${error.message}`);
 
-    // Return a 500 Internal Server Error
-    res.status(500).json({
+    // Handle API authentication errors
+    if (error.response?.status === 401) {
+      return res.status(503).json({
+        success: false,
+        message: "Unable to access movie service. Please try again later.",
+      });
+    }
+
+    // Handle rate limiting errors
+    if (error.response?.status === 429) {
+      return res.status(429).json({
+        success: false,
+        message: "Too many requests. Please try again later.",
+      });
+    }
+
+    // Handle service availability errors
+    res.status(503).json({
       success: false,
-      message: `Failed to fetch movies in category: ${category}`,
-      error: error.message,
+      message: `Unable to fetch movies in category: ${category}. Please try again later.`,
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 };

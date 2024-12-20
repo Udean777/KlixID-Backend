@@ -14,9 +14,19 @@ export const searchPerson = async (req, res) => {
   const { query } = req.params;
 
   try {
+    // Validate search query
+    if (!query || query.trim().length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Search query is required",
+      });
+    }
+
     // Fetch person search results from TMDB API
     const data = await fetchFromTMDB(
-      `https://api.themoviedb.org/3/search/person?query=${query}&include_adult=false&language=en-US&page=1`
+      `https://api.themoviedb.org/3/search/person?query=${encodeURIComponent(
+        query
+      )}&include_adult=false&language=en-US&page=1`
     );
 
     // Check if any results are returned
@@ -27,18 +37,23 @@ export const searchPerson = async (req, res) => {
       });
     }
 
-    // Save search details in user's search history
-    await User.findByIdAndUpdate(req.user._id, {
-      $push: {
-        searchHistory: {
-          id: data.results[0].id,
-          image: data.results[0].profile_path,
-          title: data.results[0].name,
-          searchType: "person",
-          createdAt: new Date(),
+    try {
+      // Save search details in user's search history
+      await User.findByIdAndUpdate(req.user._id, {
+        $push: {
+          searchHistory: {
+            id: data.results[0].id,
+            image: data.results[0].profile_path,
+            title: data.results[0].name,
+            searchType: "person",
+            createdAt: new Date(),
+          },
         },
-      },
-    });
+      });
+    } catch (dbError) {
+      // Log database error but don't fail the search request
+      console.error("Error saving to search history:", dbError.message);
+    }
 
     // Return search results to the client
     res.status(200).json({ success: true, data: data.results });
@@ -46,11 +61,27 @@ export const searchPerson = async (req, res) => {
     // Log the error for server-side tracking
     console.error("Error in searchPerson controller: ", error.message);
 
-    // Return a 500 Internal Server Error
-    res.status(500).json({
+    // Handle API authentication errors
+    if (error.response?.status === 401) {
+      return res.status(503).json({
+        success: false,
+        message: "Unable to access search service. Please try again later.",
+      });
+    }
+
+    // Handle rate limiting errors
+    if (error.response?.status === 429) {
+      return res.status(429).json({
+        success: false,
+        message: "Too many requests. Please try again later.",
+      });
+    }
+
+    // Handle service availability errors
+    res.status(503).json({
       success: false,
-      message: "Failed to search for persons",
-      error: error.message,
+      message: "Search service temporarily unavailable",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 };
@@ -65,9 +96,19 @@ export const searchMovies = async (req, res) => {
   const { query } = req.params;
 
   try {
+    // Validate search query
+    if (!query || query.trim().length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Search query is required",
+      });
+    }
+
     // Fetch movie search results from TMDB API
     const data = await fetchFromTMDB(
-      `https://api.themoviedb.org/3/search/movie?query=${query}&include_adult=false&language=en-US&page=1`
+      `https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(
+        query
+      )}&include_adult=false&language=en-US&page=1`
     );
 
     // Check if any results are returned
@@ -78,18 +119,23 @@ export const searchMovies = async (req, res) => {
       });
     }
 
-    // Save search details in user's search history
-    await User.findByIdAndUpdate(req.user._id, {
-      $push: {
-        searchHistory: {
-          id: data.results[0].id,
-          image: data.results[0].poster_path,
-          title: data.results[0].title,
-          searchType: "movie",
-          createdAt: new Date(),
+    try {
+      // Save search details in user's search history
+      await User.findByIdAndUpdate(req.user._id, {
+        $push: {
+          searchHistory: {
+            id: data.results[0].id,
+            image: data.results[0].poster_path,
+            title: data.results[0].title,
+            searchType: "movie",
+            createdAt: new Date(),
+          },
         },
-      },
-    });
+      });
+    } catch (dbError) {
+      // Log database error but don't fail the search request
+      console.error("Error saving to search history:", dbError.message);
+    }
 
     // Return search results to the client
     res.status(200).json({ success: true, data: data.results });
@@ -97,11 +143,27 @@ export const searchMovies = async (req, res) => {
     // Log the error for server-side tracking
     console.error("Error in searchMovie controller: ", error.message);
 
-    // Return a 500 Internal Server Error
-    res.status(500).json({
+    // Handle API authentication errors
+    if (error.response?.status === 401) {
+      return res.status(503).json({
+        success: false,
+        message: "Unable to access search service. Please try again later.",
+      });
+    }
+
+    // Handle rate limiting errors
+    if (error.response?.status === 429) {
+      return res.status(429).json({
+        success: false,
+        message: "Too many requests. Please try again later.",
+      });
+    }
+
+    // Handle service availability errors
+    res.status(503).json({
       success: false,
-      message: "Failed to search for movies",
-      error: error.message,
+      message: "Search service temporarily unavailable",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 };
@@ -116,9 +178,19 @@ export const searchTvShows = async (req, res) => {
   const { query } = req.params;
 
   try {
+    // Validate search query
+    if (!query || query.trim().length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Search query is required",
+      });
+    }
+
     // Fetch TV show search results from TMDB API
     const data = await fetchFromTMDB(
-      `https://api.themoviedb.org/3/search/tv?query=${query}&include_adult=false&language=en-US&page=1`
+      `https://api.themoviedb.org/3/search/tv?query=${encodeURIComponent(
+        query
+      )}&include_adult=false&language=en-US&page=1`
     );
 
     // Check if any results are returned
@@ -129,18 +201,23 @@ export const searchTvShows = async (req, res) => {
       });
     }
 
-    // Save search details in user's search history
-    await User.findByIdAndUpdate(req.user._id, {
-      $push: {
-        searchHistory: {
-          id: data.results[0].id,
-          image: data.results[0].poster_path,
-          title: data.results[0].name,
-          searchType: "tv",
-          createdAt: new Date(),
+    try {
+      // Save search details in user's search history
+      await User.findByIdAndUpdate(req.user._id, {
+        $push: {
+          searchHistory: {
+            id: data.results[0].id,
+            image: data.results[0].poster_path,
+            title: data.results[0].name,
+            searchType: "tv",
+            createdAt: new Date(),
+          },
         },
-      },
-    });
+      });
+    } catch (dbError) {
+      // Log database error but don't fail the search request
+      console.error("Error saving to search history:", dbError.message);
+    }
 
     // Return search results to the client
     res.status(200).json({ success: true, data: data.results });
@@ -148,11 +225,27 @@ export const searchTvShows = async (req, res) => {
     // Log the error for server-side tracking
     console.error("Error in searchTv controller: ", error.message);
 
-    // Return a 500 Internal Server Error
-    res.status(500).json({
+    // Handle API authentication errors
+    if (error.response?.status === 401) {
+      return res.status(503).json({
+        success: false,
+        message: "Unable to access search service. Please try again later.",
+      });
+    }
+
+    // Handle rate limiting errors
+    if (error.response?.status === 429) {
+      return res.status(429).json({
+        success: false,
+        message: "Too many requests. Please try again later.",
+      });
+    }
+
+    // Handle service availability errors
+    res.status(503).json({
       success: false,
-      message: "Failed to search for TV shows",
-      error: error.message,
+      message: "Search service temporarily unavailable",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 };
@@ -164,17 +257,36 @@ export const searchTvShows = async (req, res) => {
  */
 export const getSearchHistory = async (req, res) => {
   try {
+    // Validate user authentication
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+    }
+
     // Return user's search history
-    res.status(200).json({ success: true, content: req.user.searchHistory });
+    res.status(200).json({
+      success: true,
+      content: req.user.searchHistory || [],
+    });
   } catch (error) {
     // Log the error for server-side tracking
     console.error("Error in getSearchHistory controller: ", error.message);
 
-    // Return a 500 Internal Server Error
-    res.status(500).json({
+    // Handle mongoose errors
+    if (error.name === "MongooseError") {
+      return res.status(503).json({
+        success: false,
+        message: "Database service temporarily unavailable",
+      });
+    }
+
+    // Handle other errors
+    res.status(503).json({
       success: false,
-      message: "Failed to retrieve search history",
-      error: error.message,
+      message: "Unable to retrieve search history. Please try again later.",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 };
@@ -188,10 +300,32 @@ export const getSearchHistory = async (req, res) => {
 export const removeItemFromSearchHistory = async (req, res) => {
   let { id } = req.params;
 
-  // Convert ID to integer
-  id = parseInt(id);
-
   try {
+    // Validate ID parameter
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Item ID is required",
+      });
+    }
+
+    // Convert ID to integer
+    id = parseInt(id);
+    if (isNaN(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid ID format",
+      });
+    }
+
+    // Validate user authentication
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+    }
+
     // Remove the specified item from user's search history
     const updatedUser = await User.findByIdAndUpdate(
       req.user._id,
@@ -223,11 +357,27 @@ export const removeItemFromSearchHistory = async (req, res) => {
       error.message
     );
 
-    // Return a 500 Internal Server Error
-    res.status(500).json({
+    // Handle mongoose validation errors
+    if (error.name === "ValidationError") {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid data format",
+      });
+    }
+
+    // Handle mongoose errors
+    if (error.name === "MongooseError") {
+      return res.status(503).json({
+        success: false,
+        message: "Database service temporarily unavailable",
+      });
+    }
+
+    // Handle other errors
+    res.status(503).json({
       success: false,
-      message: "Failed to remove item from search history",
-      error: error.message,
+      message: "Unable to remove item from history. Please try again later.",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 };

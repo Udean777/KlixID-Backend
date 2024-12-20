@@ -26,14 +26,14 @@ const movieRoutes = express.Router();
  * @route GET /trending
  * @middleware protectRoute - Ensures user authentication
  */
-movieRoutes.get("/trending", protectRoute, getTrendingMovies);
+movieRoutes.get("/trending", getTrendingMovies);
 
 /**
  * Fetch currently playing movies
  * @route GET /nowplaying
  * @middleware protectRoute - Ensures user authentication
  */
-movieRoutes.get("/nowplaying", protectRoute, getNowPlayingMovies);
+movieRoutes.get("/nowplaying", getNowPlayingMovies);
 
 /**
  * Fetch movie trailer
@@ -41,7 +41,7 @@ movieRoutes.get("/nowplaying", protectRoute, getNowPlayingMovies);
  * @param {string} id - Movie ID
  * @middleware protectRoute - Ensures user authentication
  */
-movieRoutes.get("/:id/trailer", protectRoute, getMovieTrailer);
+movieRoutes.get("/:id/trailer", getMovieTrailer);
 
 /**
  * Fetch movie details
@@ -49,7 +49,7 @@ movieRoutes.get("/:id/trailer", protectRoute, getMovieTrailer);
  * @param {string} id - Movie ID
  * @middleware protectRoute - Ensures user authentication
  */
-movieRoutes.get("/:id/details", protectRoute, getMovieDetails);
+movieRoutes.get("/:id/details", getMovieDetails);
 
 /**
  * Fetch similar movies
@@ -57,7 +57,7 @@ movieRoutes.get("/:id/details", protectRoute, getMovieDetails);
  * @param {string} id - Movie ID
  * @middleware protectRoute - Ensures user authentication
  */
-movieRoutes.get("/:id/similar", protectRoute, getSimilarMovies);
+movieRoutes.get("/:id/similar", getSimilarMovies);
 
 /**
  * Fetch movie recommendations
@@ -65,7 +65,7 @@ movieRoutes.get("/:id/similar", protectRoute, getSimilarMovies);
  * @param {string} id - Movie ID
  * @middleware protectRoute - Ensures user authentication
  */
-movieRoutes.get("/:id/recommendations", protectRoute, getRecommendationMovies);
+movieRoutes.get("/:id/recommendations", getRecommendationMovies);
 
 /**
  * Fetch movies by category
@@ -73,6 +73,6 @@ movieRoutes.get("/:id/recommendations", protectRoute, getRecommendationMovies);
  * @param {string} category - Movie category (popular, top_rated, upcoming)
  * @middleware protectRoute - Ensures user authentication
  */
-movieRoutes.get("/:category", protectRoute, getMoviesByCategory);
+movieRoutes.get("/:category", getMoviesByCategory);
 
 export default movieRoutes;

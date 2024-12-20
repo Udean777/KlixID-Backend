@@ -4,7 +4,10 @@ import { ENV_VARS } from "../config/env_vars.js";
 // Function to generate a JWT token and set it as a cookie in the response
 export const generateTokenAndCookies = (userId, res) => {
   // Generate a JWT token with the user ID as payload, using a secret key and expiration time of 15 days
-  const token = jwt.sign({ userId }, ENV_VARS.JWT_SECRET, { expiresIn: "15d" });
+  const token = jwt.sign({ userId }, ENV_VARS.JWT_SECRET, {
+    expiresIn: "15d",
+    algorithm: "HS256",
+  });
 
   // Set the generated token as a cookie in the HTTP response
   res.cookie("jwt-klixid", token, {

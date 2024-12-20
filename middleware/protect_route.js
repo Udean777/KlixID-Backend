@@ -50,7 +50,7 @@ export const protectRoute = async (req, res, next) => {
     next();
   } catch (e) {
     // Handle any errors during the authentication process
-    console.log("Error in protect_route middleware: ", e.message);
+    console.log("Error in protect_route middleware: ", e);
 
     // Return internal server error if something unexpected occurs
     res.status(500).json({ success: false, message: "Internal Server Error" });

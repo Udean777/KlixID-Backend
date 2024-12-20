@@ -25,7 +25,7 @@ const searchRoutes = express.Router();
  * @param {string} query - Search term for persons
  * @middleware protectRoute - Ensures user authentication
  */
-searchRoutes.get("/person/:query", protectRoute, searchPerson);
+searchRoutes.get("/person/:query", searchPerson);
 
 /**
  * Search for movies by title
@@ -33,7 +33,7 @@ searchRoutes.get("/person/:query", protectRoute, searchPerson);
  * @param {string} query - Search term for movies
  * @middleware protectRoute - Ensures user authentication
  */
-searchRoutes.get("/movie/:query", protectRoute, searchMovies);
+searchRoutes.get("/movie/:query", searchMovies);
 
 /**
  * Search for TV shows by title
@@ -41,14 +41,14 @@ searchRoutes.get("/movie/:query", protectRoute, searchMovies);
  * @param {string} query - Search term for TV shows
  * @middleware protectRoute - Ensures user authentication
  */
-searchRoutes.get("/tv/:query", protectRoute, searchTvShows);
+searchRoutes.get("/tv/:query", searchTvShows);
 
 /**
  * Retrieve user's search history
  * @route GET /history
  * @middleware protectRoute - Ensures user authentication
  */
-searchRoutes.get("/history", protectRoute, getSearchHistory);
+searchRoutes.get("/history", getSearchHistory);
 
 /**
  * Remove a specific item from search history
@@ -56,6 +56,6 @@ searchRoutes.get("/history", protectRoute, getSearchHistory);
  * @param {string} id - ID of the search history item to remove
  * @middleware protectRoute - Ensures user authentication
  */
-searchRoutes.delete("/history/:id", protectRoute, removeItemFromSearchHistory);
+searchRoutes.delete("/history/:id", removeItemFromSearchHistory);
 
 export default searchRoutes;

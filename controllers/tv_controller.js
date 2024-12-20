@@ -91,7 +91,7 @@ export const getPopularTv = async (req, res) => {
     }
 
     // Return the list of popular TV shows
-    res.json({ success: true, content: data.results });
+    res.json({ success: true, data: data.results });
   } catch (error) {
     // Log the error for server-side tracking
     console.error("Error fetching popular TV shows:", error);
@@ -237,7 +237,7 @@ export const getTvDetails = async (req, res) => {
     }
 
     // Return the TV show details
-    res.status(200).json({ success: true, content: data });
+    res.status(200).json({ success: true, data: data });
   } catch (error) {
     // Log the error for server-side tracking
     console.error(`Error fetching details for TV show ${id}:`, error);
@@ -309,7 +309,7 @@ export const getSimilarTvs = async (req, res) => {
     }
 
     // Return the list of similar TV shows
-    res.status(200).json({ success: true, content: data.results });
+    res.status(200).json({ success: true, data: data.results });
   } catch (error) {
     // Log the error for server-side tracking
     console.error(`Error fetching similar TV shows for ${id}:`, error);
@@ -373,7 +373,7 @@ export async function getRecommendationTvs(req, res) {
     }
 
     // Return the list of recommended TV shows
-    res.status(200).json({ success: true, content: data.results });
+    res.status(200).json({ success: true, data: data.results });
   } catch (error) {
     // Log the error for server-side tracking
     console.error(`Error fetching recommendations for TV show ${id}:`, error);
@@ -437,7 +437,7 @@ export async function getTvsByCategory(req, res) {
     }
 
     // Return the list of TV shows in the category
-    res.status(200).json({ success: true, content: data.results });
+    res.status(200).json({ success: true, data: data.results });
   } catch (error) {
     // Log the error for server-side tracking
     console.error(`Error fetching TV shows in category ${category}:`, error);
@@ -501,7 +501,7 @@ export async function getTvKeywords(req, res) {
     }
 
     // Return the list of keywords
-    res.status(200).json({ success: true, content: data.results });
+    res.status(200).json({ success: true, data: data.results });
   } catch (error) {
     // Log the error for server-side tracking
     console.error(`Error fetching keywords for TV show ${id}:`, error);

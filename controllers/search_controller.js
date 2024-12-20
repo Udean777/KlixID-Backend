@@ -268,7 +268,7 @@ export const getSearchHistory = async (req, res) => {
     // Return user's search history
     res.status(200).json({
       success: true,
-      content: req.user.searchHistory || [],
+      data: req.user.searchHistory || [],
     });
   } catch (error) {
     // Log the error for server-side tracking

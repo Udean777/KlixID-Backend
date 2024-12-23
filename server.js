@@ -14,6 +14,10 @@ import movieRoutes from "./routes/movie_route.js";
 // Import routes related to search
 import searchRoutes from "./routes/search_route.js";
 import tvRoutes from "./routes/tv_route.js";
+// Import routes related to ticket
+import ticketRoutes from "./routes/ticket_route.js";
+// import routes related to admin
+import adminThRoute from "./routes/admin_theater_route.js";
 
 // Create an Express application instance
 const app = express();
@@ -35,6 +39,10 @@ app.use("/api/v1/movies", movieRoutes);
 app.use("/api/v1/search", searchRoutes);
 // Set up routes for TV shows
 app.use("/api/v1/tv", tvRoutes);
+// Set up routes for ticket
+app.use("/api/v1/ticket", ticketRoutes);
+// Set up routes for admin
+app.use("/api/v1/admin", adminThRoute);
 
 // Production configuration
 if (ENV_VARS.NODE_ENV === "production") {

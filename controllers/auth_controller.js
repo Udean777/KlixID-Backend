@@ -13,15 +13,24 @@ import { generateTokenAndCookies } from "../utils/generate_token.js";
  */
 export const signUp = async (req, res) => {
   try {
-    // Extract email and password from request body
-    const { email, password } = req.body;
+    const { email, password, firstName, lastName, role } = req.body;
 
-    // Validation: Check if email and password are provided
-    if (!email || !password) {
+    // Validate fields
+    if (!email || !password || !firstName || !lastName) {
       return res.status(400).json({
         success: false,
         message: "All fields are required",
       });
+    }
+
+    // Only allow super_admin to create admin accounts
+    if (role && ["admin", "super_admin"].includes(role)) {
+      if (!req.user || req.user.role !== "super_admin") {
+        return res.status(403).json({
+          success: false,
+          message: "Unauthorized to create admin accounts",
+        });
+      }
     }
 
     // Validation: Minimum password length
@@ -64,6 +73,9 @@ export const signUp = async (req, res) => {
     const newUser = new User({
       email,
       password: hashedPw,
+      firstName,
+      lastName,
+      role: role || "user",
       image,
     });
 
@@ -239,7 +251,6 @@ export const signOut = async (req, res) => {
  */
 export const authCheck = async (req, res) => {
   try {
-    // Verify that a user is authenticated
     if (!req.user) {
       return res.status(401).json({
         success: false,
@@ -247,10 +258,17 @@ export const authCheck = async (req, res) => {
       });
     }
 
-    // Send the authenticated user details
+    // Update last login
+    await User.findByIdAndUpdate(req.user._id, {
+      lastLogin: new Date(),
+    });
+
     res.status(200).json({
       success: true,
-      user: req.user,
+      user: {
+        ...req.user._doc,
+        isAdmin: ["admin", "super_admin"].includes(req.user.role),
+      },
     });
   } catch (error) {
     // Log the error for server-side tracking

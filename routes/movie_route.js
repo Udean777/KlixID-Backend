@@ -24,14 +24,12 @@ const movieRoutes = express.Router();
 /**
  * Fetch trending movies
  * @route GET /trending
- * @middleware protectRoute - Ensures user authentication
  */
 movieRoutes.get("/trending", getTrendingMovies);
 
 /**
  * Fetch currently playing movies
  * @route GET /nowplaying
- * @middleware protectRoute - Ensures user authentication
  */
 movieRoutes.get("/nowplaying", getNowPlayingMovies);
 
@@ -39,7 +37,6 @@ movieRoutes.get("/nowplaying", getNowPlayingMovies);
  * Fetch movie trailer
  * @route GET /:id/trailer
  * @param {string} id - Movie ID
- * @middleware protectRoute - Ensures user authentication
  */
 movieRoutes.get("/:id/trailer", getMovieTrailer);
 
@@ -47,7 +44,6 @@ movieRoutes.get("/:id/trailer", getMovieTrailer);
  * Fetch movie details
  * @route GET /:id/details
  * @param {string} id - Movie ID
- * @middleware protectRoute - Ensures user authentication
  */
 movieRoutes.get("/:id/details", getMovieDetails);
 
@@ -55,7 +51,6 @@ movieRoutes.get("/:id/details", getMovieDetails);
  * Fetch similar movies
  * @route GET /:id/similar
  * @param {string} id - Movie ID
- * @middleware protectRoute - Ensures user authentication
  */
 movieRoutes.get("/:id/similar", getSimilarMovies);
 
@@ -63,7 +58,6 @@ movieRoutes.get("/:id/similar", getSimilarMovies);
  * Fetch movie recommendations
  * @route GET /:id/recommendations
  * @param {string} id - Movie ID
- * @middleware protectRoute - Ensures user authentication
  */
 movieRoutes.get("/:id/recommendations", getRecommendationMovies);
 
@@ -71,7 +65,6 @@ movieRoutes.get("/:id/recommendations", getRecommendationMovies);
  * Fetch movies by category
  * @route GET /:category
  * @param {string} category - Movie category (popular, top_rated, upcoming)
- * @middleware protectRoute - Ensures user authentication
  */
 movieRoutes.get("/:category", getMoviesByCategory);
 

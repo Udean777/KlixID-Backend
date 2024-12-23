@@ -1,35 +1,66 @@
-// Import Mongoose library for MongoDB schema and model creation
 import mongoose from "mongoose";
 
-// Define the User schema
-// Describes the structure and validation rules for user documents in the database
 const userSchema = mongoose.Schema({
-  // Email field configuration
   email: {
-    type: String, // Specifies the data type as String
-    required: true, // Makes the email a mandatory field
-    unique: true, // Ensures no duplicate email addresses in the database
+    type: String,
+    required: true,
+    unique: true,
   },
-
-  // Password field configuration
   password: {
-    type: String, // Specifies the data type as String
-    required: true, // Makes the password a mandatory field
+    type: String,
+    required: true,
   },
-
-  // Profile image field configuration
+  role: {
+    type: String,
+    enum: ["user", "admin", "super_admin"],
+    default: "user",
+  },
   image: {
-    type: String, // Specifies the data type as String
-    default: "", // Provides an empty string as default value if no image is set
+    type: String,
+    default: "",
   },
-
-  // Search history field configuration
   searchHistory: {
-    type: Array, // Allows storing an array of search items
-    default: [], // Initializes with an empty array if no search history exists
+    type: Array,
+    default: [],
+  },
+  firstName: {
+    type: String,
+    required: true,
+  },
+  lastName: {
+    type: String,
+    required: true,
+  },
+  phone: {
+    type: String,
+  },
+  isActive: {
+    type: Boolean,
+    default: true,
+  },
+  lastLogin: {
+    type: Date,
+    default: Date.now,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now,
   },
 });
 
-// Create and export the User model
-// This model provides an interface to interact with the 'users' collection in MongoDB
+// Update timestamp on save
+userSchema.pre("save", function (next) {
+  this.updatedAt = new Date();
+  next();
+});
+
+// Virtual for full name
+userSchema.virtual("fullName").get(function () {
+  return `${this.firstName} ${this.lastName}`;
+});
+
 export const User = mongoose.model("User", userSchema);

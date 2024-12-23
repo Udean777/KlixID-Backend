@@ -1,6 +1,6 @@
 import express from "express";
-import { protectRoute } from "../middleware/auth_middleware.js";
-import { isAdmin } from "../middleware/admin_middleware.js";
+import { protectRoute } from "../middleware/protect_route.js";
+import { isAdmin } from "../middleware/is_admin.js";
 
 const adminThRoute = express.Router();
 
@@ -10,8 +10,6 @@ import {
   updateShowtime,
   deleteShowtime,
   createSeat,
-  updateSeat,
-  deleteSeat,
   getTheaterStats,
   getBookingStats,
 } from "../controllers/admin_controller.js";
@@ -27,8 +25,6 @@ adminThRoute.delete("/showtimes/:showtimeId", deleteShowtime);
 
 // Seat Management
 adminThRoute.post("/seats", createSeat);
-adminThRoute.put("/seats/:seatId", updateSeat);
-adminThRoute.delete("/seats/:seatId", deleteSeat);
 
 // Statistics and Reports
 adminThRoute.get("/stats/theater", getTheaterStats);

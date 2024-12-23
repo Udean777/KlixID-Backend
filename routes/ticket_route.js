@@ -1,5 +1,5 @@
 import express from "express";
-import { protectRoute } from "../middleware/auth_middleware.js";
+import { protectRoute } from "../middleware/protect_route.js";
 import {
   getMovieShowtimes,
   getAvailableSeats,
@@ -7,7 +7,7 @@ import {
   getBookingDetails,
   cancelBooking,
   getUserBookings,
-} from "../controllers/booking_controller.js";
+} from "../controllers/ticket_controller.js";
 
 const ticketRoutes = express.Router();
 

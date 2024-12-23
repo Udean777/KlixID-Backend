@@ -1,7 +1,6 @@
-import { Showtime } from "../models/showtime.model.js";
-import { Seat } from "../models/seat.model.js";
-import { Booking } from "../models/booking.model.js";
-import { User } from "../models/user.model.js";
+import Showtime from "../models/showtime_model.js";
+import Seat from "../models/seat_model.js";
+import Booking from "../models/booking_model.js";
 
 /**
  * Create a new showtime

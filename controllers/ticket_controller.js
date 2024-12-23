@@ -1,4 +1,4 @@
-import { TMDBService } from "../services/tmdb_service.js";
+import { fetchFromTMDB } from "../services/tmdb_services.js";
 
 import Booking from "../models/booking_model.js";
 import ShowTime from "../models/showtime_model.js";

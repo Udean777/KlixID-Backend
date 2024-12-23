@@ -13,6 +13,7 @@ import authRoutes from "./routes/auth_route.js";
 import movieRoutes from "./routes/movie_route.js";
 // Import routes related to search
 import searchRoutes from "./routes/search_route.js";
+// Import routes related to TV shows
 import tvRoutes from "./routes/tv_route.js";
 // Import routes related to ticket
 import ticketRoutes from "./routes/ticket_route.js";
